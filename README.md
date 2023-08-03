@@ -1,0 +1,2 @@
+# mks
+Mullvad Kill Switch

@@ -14,6 +14,7 @@ namespace MKS
         static bool vpnRunning;
         static bool killSwitch = true;
         static string? msg;
+        static string? exitNode = "us-chi-wg-104";
 
         static async Task Main()
         {
@@ -29,6 +30,7 @@ namespace MKS
                 catch (HttpRequestException ex)
                 {
                     Console.WriteLine(ex.Message);
+                    KillqBittorrent();
                     killSwitch = false;
                 }
 
@@ -52,13 +54,12 @@ namespace MKS
 
                     msg += ($" You are connected to Mullvad: {mullvad.MullvadExitIP}. You are connected to {mullvad.MullvadHostname}.");
 
-                    if (mullvad.MullvadHostname != "us-chi-wg-104")
+                    if (mullvad.MullvadHostname != exitNode)
                     {
-                        Console.WriteLine("Not connected to us-chi-wg-104, Killing qBittorrent");
+                        Console.WriteLine($"Not connected to {exitNode}, Killing qBittorrent");
                         KillqBittorrent();
                         killSwitch = false;
-                        break;
-                        
+                        break;  
                     }
                 }
                 else

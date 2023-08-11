@@ -14,7 +14,7 @@ namespace MKS
         static bool vpnRunning;
         static bool killSwitch = true;
         static string? msg;
-        static string? exitNode = "us-chi-wg-104";
+        static readonly string? exitNode = "us-chi-wg-104";
 
         static async Task Main()
         {

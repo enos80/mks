@@ -8,9 +8,10 @@ namespace MKS
     internal class Program
     {
         //private static readonly ILog log = LogManager.GetLogger(typeof(Program));
+
         static readonly HttpClient client = new();
         static Mullvad mullvad = new();
-        static bool qbittorrentRunning = IsQBTRunning();
+        static bool qbittorrentRunning;
         static bool vpnRunning;
         static bool killSwitch = true;
         static string? msg;
@@ -18,7 +19,7 @@ namespace MKS
 
         static async Task Main()
         {
-            while (killSwitch == true)
+            while (killSwitch)
             {
                 try
                 {
@@ -37,44 +38,17 @@ namespace MKS
                 vpnRunning = IsVpnActive(mullvad);
                 qbittorrentRunning = IsQBTRunning();
 
-                if (vpnRunning == true)
+                if (vpnRunning == true && qbittorrentRunning == true && mullvad.MullvadHostname == exitNode)
                 {
-                    if (qbittorrentRunning == true)
-                    {
-                        msg = ($"qBittorrent is running: {qbittorrentRunning}.");
-                    }
-                    else
-                    {
-                        msg = ($"qBittorrent is running: {qbittorrentRunning}.");
-                        //PrintConsole(log, msg);
-                        Console.WriteLine(msg);
-                        killSwitch = false;
-                        break;
-                    }
-
-                    msg += ($" You are connected to Mullvad: {mullvad.MullvadExitIP}. You are connected to {mullvad.MullvadHostname}.");
-
-                    if (mullvad.MullvadHostname != exitNode)
-                    {
-                        Console.WriteLine($"Not connected to {exitNode}, Killing qBittorrent");
-                        KillqBittorrent();
-                        killSwitch = false;
-                        break;  
-                    }
+                    msg = $"Mullvad and qBittorrent active. Exit Node: {mullvad.MullvadHostname}";
                 }
                 else
                 {
-                    msg = ($"You are connected to Mullvad: {mullvad.MullvadExitIP}. Killing qBittorrent.");
-                    KillqBittorrent();
-                    Console.WriteLine(msg);
-                    killSwitch = false;
-                    break;
+                    msg = $"Mullvad: {vpnRunning}. qBittorrent: {qbittorrentRunning}. Exit Node: {mullvad.MullvadHostname}";
+                    MksShutdown(msg);
                 }
-
-                //PrintConsole(log, msg);
                 Console.WriteLine(msg);
                 Thread.Sleep(500);
-
             }
         }
 
@@ -102,6 +76,14 @@ namespace MKS
             {
                 process.Kill();
             }
+        }
+
+        static void MksShutdown(string msg)
+        {
+            KillqBittorrent();
+            killSwitch = false;
+            Console.WriteLine(msg);
+            Environment.Exit(0);
         }
     }
 }
